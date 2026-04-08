@@ -1,0 +1,24 @@
+{
+  "name": "Finance: Expense Approval",
+  "nodes": [
+    {
+      "parameters": {"httpMethod": "POST", "path": "submit-expense"},
+      "name": "Form Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"channel": "manager-id", "text": "=Expense Approval Required: {{$json.body.amount}} {{$json.body.currency}} by {{$json.body.employee_name}}", "buttons": [{"label": "Approve", "value": "approved"}, {"label": "Reject", "value": "rejected"}]},
+      "name": "Slack Approval",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [420, 300]
+    }
+  ],
+  "connections": {
+    "Form Webhook": {"main": [[{"node": "Slack Approval", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

@@ -1,0 +1,32 @@
+{
+  "name": "Marketing: Lead Capture",
+  "nodes": [
+    {
+      "parameters": {"httpMethod": "POST", "path": "landing-page-lead"},
+      "name": "Webhook: Form Submit",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"resource": "contact", "operation": "create", "email": "={{$json.body.email}}", "firstName": "={{$json.body.first_name}}", "lastName": "={{$json.body.last_name}}"},
+      "name": "HubSpot: Create Contact",
+      "type": "n8n-nodes-base.hubspot",
+      "typeVersion": 1,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {"channel": "#sales-leads", "text": "=🤑 *New Lead Captured!*\nName: {{$node['Webhook: Form Submit'].json.body.first_name}}\nEmail: {{$node['Webhook: Form Submit'].json.body.email}}"},
+      "name": "Notify Sales Team",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Form Submit": {"main": [[{"node": "HubSpot: Create Contact", "type": "main", "index": 0}]]},
+    "HubSpot: Create Contact": {"main": [[{"node": "Notify Sales Team", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

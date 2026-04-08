@@ -1,0 +1,24 @@
+{
+  "name": "Infra: Docker Monitor",
+  "nodes": [
+    {
+      "parameters": {"httpMethod": "POST", "path": "container-down"},
+      "name": "Webhook: Container Event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"command": "=docker restart {{$json.body.container_name}}"},
+      "name": "SSH: Restart Container",
+      "type": "n8n-nodes-base.ssh",
+      "typeVersion": 1,
+      "position": [440, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Container Event": {"main": [[{"node": "SSH: Restart Container", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

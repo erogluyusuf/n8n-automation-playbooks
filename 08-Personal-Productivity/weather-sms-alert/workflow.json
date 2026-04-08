@@ -1,0 +1,40 @@
+{
+  "name": "Productivity: Weather Alert",
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "days", "triggerAtHour": 7}]}},
+      "name": "Morning Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"city": "Istanbul", "language": "en"},
+      "name": "OpenWeatherMap",
+      "type": "n8n-nodes-base.openWeatherMap",
+      "typeVersion": 1,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {"conditions": {"string": [{"value1": "={{$json.weather[0].main}}", "operation": "contains", "value2": "Rain"}]}},
+      "name": "Is Raining?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {"from": "+1234567890", "to": "+0987654321", "message": "It's going to rain today! Don't forget your umbrella. ☔"},
+      "name": "Twilio SMS",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [920, 200]
+    }
+  ],
+  "connections": {
+    "Morning Trigger": {"main": [[{"node": "OpenWeatherMap", "type": "main", "index": 0}]]},
+    "OpenWeatherMap": {"main": [[{"node": "Is Raining?", "type": "main", "index": 0}]]},
+    "Is Raining?": {"main": [[{"node": "Twilio SMS", "type": "main", "index": 0}], []]}
+  },
+  "active": false,
+  "settings": {}
+}

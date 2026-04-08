@@ -1,0 +1,32 @@
+{
+  "name": "Emergency: Volunteer Dispatch",
+  "nodes": [
+    {
+      "parameters": {"httpMethod": "POST", "path": "trigger-dispatch"},
+      "name": "Webhook: Dispatch Signal",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"operation": "executeQuery", "query": "SELECT phone_number FROM volunteers WHERE status = 'available';"},
+      "name": "Postgres: Get Volunteers",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {"from": "EMERGENCY", "to": "={{$json.phone_number}}", "message": "=EMERGENCY DISPATCH: Please report to {{$node['Webhook: Dispatch Signal'].json.body.location}}. Detail: {{$node['Webhook: Dispatch Signal'].json.body.message}}"},
+      "name": "Twilio: Broadcast",
+      "type": "n8n-nodes-base.twilio",
+      "typeVersion": 1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Dispatch Signal": {"main": [[{"node": "Postgres: Get Volunteers", "type": "main", "index": 0}]]},
+    "Postgres: Get Volunteers": {"main": [[{"node": "Twilio: Broadcast", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

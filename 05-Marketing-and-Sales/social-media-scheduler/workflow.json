@@ -1,0 +1,39 @@
+{
+  "name": "Marketing: Social Scheduler",
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "hours", "triggerAtMinute": 0}]}},
+      "name": "Cron (Hourly)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"operation": "read", "sheetId": "1BxiMVs0XRYFgwnV_eqV...", "range": "A:D"},
+      "name": "Get Pending Posts",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {"text": "={{$json.post_content}}"},
+      "name": "Post to LinkedIn",
+      "type": "n8n-nodes-base.linkedin",
+      "typeVersion": 1,
+      "position": [660, 200]
+    },
+    {
+      "parameters": {"text": "={{$json.post_content}}"},
+      "name": "Post to Twitter",
+      "type": "n8n-nodes-base.twitter",
+      "typeVersion": 1,
+      "position": [660, 400]
+    }
+  ],
+  "connections": {
+    "Cron (Hourly)": {"main": [[{"node": "Get Pending Posts", "type": "main", "index": 0}]]},
+    "Get Pending Posts": {"main": [[{"node": "Post to LinkedIn", "type": "main", "index": 0}, {"node": "Post to Twitter", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

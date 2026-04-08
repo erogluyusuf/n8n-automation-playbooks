@@ -1,0 +1,37 @@
+{
+  "name": "E-Commerce: Abandoned Cart",
+  "nodes": [
+    {
+      "parameters": {"httpMethod": "POST", "path": "abandoned-cart"},
+      "name": "Webhook: Cart Event",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"amount": 4, "unit": "hours"},
+      "name": "Wait 4 Hours",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "sales@company.com",
+        "toEmail": "={{$json.body.customer_email}}",
+        "subject": "You left something behind!",
+        "text": "=Hi {{$json.body.customer_name}},\n\nLooks like you forgot some items in your cart. Come back and complete your purchase!"
+      },
+      "name": "Send Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [640, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Cart Event": {"main": [[{"node": "Wait 4 Hours", "type": "main", "index": 0}]]},
+    "Wait 4 Hours": {"main": [[{"node": "Send Email", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

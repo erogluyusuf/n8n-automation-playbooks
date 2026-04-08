@@ -1,0 +1,32 @@
+{
+  "name": "HR: Employee Onboarding",
+  "nodes": [
+    {
+      "parameters": {"httpMethod": "POST", "path": "hire-event"},
+      "name": "Webhook: Hired",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"resource": "user", "operation": "create", "primaryEmail": "={{$json.body.first_name.toLowerCase()}}.{{$json.body.last_name.toLowerCase()}}@company.com", "nameFamily": "={{$json.body.last_name}}", "nameGiven": "={{$json.body.first_name}}", "password": "ChangeMe123!"},
+      "name": "Google Workspace User",
+      "type": "n8n-nodes-base.googleWorkspace",
+      "typeVersion": 1,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {"channel": "#general", "text": "=Welcome aboard, {{$node['Webhook: Hired'].json.body.first_name}}! 🚀"},
+      "name": "Slack Welcome",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [640, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Hired": {"main": [[{"node": "Google Workspace User", "type": "main", "index": 0}]]},
+    "Google Workspace User": {"main": [[{"node": "Slack Welcome", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

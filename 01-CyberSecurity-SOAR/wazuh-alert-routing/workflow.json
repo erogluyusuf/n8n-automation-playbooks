@@ -1,0 +1,76 @@
+{
+  "name": "SOAR: Wazuh Alert Routing",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "wazuh-alerts",
+        "options": {}
+      },
+      "name": "Wazuh Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [160, 360]
+    },
+    {
+      "parameters": {
+        "dataType": "string",
+        "value1": "={{ $json.body.rule.level }}",
+        "rules": {
+          "rules": [
+            {"operation": "largerEqual", "value2": "12", "output": 0},
+            {"operation": "largerEqual", "value2": "7", "output": 1}
+          ]
+        },
+        "fallbackOutput": 2
+      },
+      "name": "Check Severity",
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 1,
+      "position": [400, 360]
+    },
+    {
+      "parameters": {
+        "project": "SEC",
+        "issueType": "Incident",
+        "summary": "=CRITICAL: {{$node[\"Wazuh Webhook\"].json.body.rule.description}}",
+        "description": "=Agent: {{$node[\"Wazuh Webhook\"].json.body.agent.name}}\nLevel: {{$node[\"Wazuh Webhook\"].json.body.rule.level}}\nDetails: {{$node[\"Wazuh Webhook\"].json.body.full_log}}"
+      },
+      "name": "Create Jira Ticket",
+      "type": "n8n-nodes-base.jira",
+      "typeVersion": 1,
+      "position": [680, 200]
+    },
+    {
+      "parameters": {
+        "channel": "#soc-alerts",
+        "text": "=⚠️ *High Severity Wazuh Alert*\n*Rule:* {{$node[\"Wazuh Webhook\"].json.body.rule.description}}\n*Agent:* {{$node[\"Wazuh Webhook\"].json.body.agent.name}}"
+      },
+      "name": "Slack Notification",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [680, 360]
+    },
+    {
+      "parameters": {},
+      "name": "No Action (Log)",
+      "type": "n8n-nodes-base.noOp",
+      "typeVersion": 1,
+      "position": [680, 520]
+    }
+  ],
+  "connections": {
+    "Wazuh Webhook": {
+      "main": [[{"node": "Check Severity", "type": "main", "index": 0}]]
+    },
+    "Check Severity": {
+      "main": [
+        [{"node": "Create Jira Ticket", "type": "main", "index": 0}],
+        [{"node": "Slack Notification", "type": "main", "index": 0}],
+        [{"node": "No Action (Log)", "type": "main", "index": 0}]
+      ]
+    }
+  },
+  "active": false,
+  "settings": {}
+}

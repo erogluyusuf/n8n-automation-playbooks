@@ -1,0 +1,32 @@
+{
+  "name": "IoT: Edge Health",
+  "nodes": [
+    {
+      "parameters": {"httpMethod": "POST", "path": "pi-health"},
+      "name": "Webhook: Health Data",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"conditions": {"number": [{"value1": "={{$json.body.cpu_temp}}", "operation": "larger", "value2": 75}]}},
+      "name": "High Temp?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {"chatId": "YOUR_CHAT_ID", "text": "=🔥 Warning: Edge Device {{$json.body.hostname}} CPU Temp is {{$json.body.cpu_temp}}°C!"},
+      "name": "Telegram Alert",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [680, 200]
+    }
+  ],
+  "connections": {
+    "Webhook: Health Data": {"main": [[{"node": "High Temp?", "type": "main", "index": 0}]]},
+    "High Temp?": {"main": [[{"node": "Telegram Alert", "type": "main", "index": 0}], []]}
+  },
+  "active": false,
+  "settings": {}
+}

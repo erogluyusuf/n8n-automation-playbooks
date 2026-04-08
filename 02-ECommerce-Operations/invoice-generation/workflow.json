@@ -1,0 +1,32 @@
+{
+  "name": "E-Commerce: Invoice Generation",
+  "nodes": [
+    {
+      "parameters": {"httpMethod": "POST", "path": "payment-success"},
+      "name": "Webhook: Payment",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"operation": "generate", "templateId": "inv_template_01", "data": "={{$json.body}}"},
+      "name": "Generate PDF",
+      "type": "n8n-nodes-base.pdf",
+      "typeVersion": 1,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {"toEmail": "={{$node['Webhook: Payment'].json.body.customer_email}}", "subject": "Your Invoice", "text": "Thank you for your purchase. Please find your invoice attached.", "attachments": "invoice.pdf"},
+      "name": "Email Invoice",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [640, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: Payment": {"main": [[{"node": "Generate PDF", "type": "main", "index": 0}]]},
+    "Generate PDF": {"main": [[{"node": "Email Invoice", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

@@ -1,0 +1,40 @@
+{
+  "name": "Data: Notion Scraper",
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "hours", "triggerAtMinute": 0}]}},
+      "name": "Hourly Check",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"url": "https://news.ycombinator.com/", "options": {}},
+      "name": "Fetch Website",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {"extractionValues": {"values": [{"key": "title", "cssSelector": ".titleline > a"}, {"key": "url", "cssSelector": ".titleline > a", "returnValue": "attribute", "attribute": "href"}]}},
+      "name": "Parse HTML",
+      "type": "n8n-nodes-base.html",
+      "typeVersion": 1,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {"resource": "databasePage", "databaseId": "notion_db_id", "propertiesUi": {"propertyValues": [{"key": "Name", "title": "={{$json.title}}"}, {"key": "Link", "url": "={{$json.url}}"}]}},
+      "name": "Add to Notion",
+      "type": "n8n-nodes-base.notion",
+      "typeVersion": 2,
+      "position": [860, 300]
+    }
+  ],
+  "connections": {
+    "Hourly Check": {"main": [[{"node": "Fetch Website", "type": "main", "index": 0}]]},
+    "Fetch Website": {"main": [[{"node": "Parse HTML", "type": "main", "index": 0}]]},
+    "Parse HTML": {"main": [[{"node": "Add to Notion", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

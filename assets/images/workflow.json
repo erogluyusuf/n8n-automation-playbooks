@@ -1,0 +1,24 @@
+{
+  "name": "Utility: Image Watermark",
+  "nodes": [
+    {
+      "parameters": {"httpMethod": "POST", "path": "watermark-image"},
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"operation": "text", "text": "CONFIDENTIAL", "fontSize": 48, "fontColor": "#FF0000"},
+      "name": "Edit Image",
+      "type": "n8n-nodes-base.editImage",
+      "typeVersion": 1,
+      "position": [440, 300]
+    }
+  ],
+  "connections": {
+    "Webhook": {"main": [[{"node": "Edit Image", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

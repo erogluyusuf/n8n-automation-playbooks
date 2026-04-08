@@ -1,0 +1,40 @@
+{
+  "name": "Infra: AWS Cost Alert",
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "days", "triggerAtHour": 8}]}},
+      "name": "Daily Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"action": "getCostAndUsage", "timePeriod": "yesterday", "granularity": "DAILY", "metrics": ["UnblendedCost"]},
+      "name": "AWS Cost Explorer",
+      "type": "n8n-nodes-base.aws",
+      "typeVersion": 1,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {"conditions": {"number": [{"value1": "={{$json.Total.UnblendedCost.Amount}}", "operation": "larger", "value2": 50}]}},
+      "name": "Over Budget?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [680, 300]
+    },
+    {
+      "parameters": {"channel": "#finance-alerts", "text": "=⚠️ *AWS Cost Alert*\nYesterday's spend was ${{$node['AWS Cost Explorer'].json.Total.UnblendedCost.Amount}}, which exceeds the daily budget!"},
+      "name": "Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [920, 200]
+    }
+  ],
+  "connections": {
+    "Daily Schedule": {"main": [[{"node": "AWS Cost Explorer", "type": "main", "index": 0}]]},
+    "AWS Cost Explorer": {"main": [[{"node": "Over Budget?", "type": "main", "index": 0}]]},
+    "Over Budget?": {"main": [[{"node": "Slack Alert", "type": "main", "index": 0}], []]}
+  },
+  "active": false,
+  "settings": {}
+}

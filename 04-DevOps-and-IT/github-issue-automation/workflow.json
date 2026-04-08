@@ -1,0 +1,32 @@
+{
+  "name": "DevOps: GitHub Triage",
+  "nodes": [
+    {
+      "parameters": {"events": ["issue_comment", "issues"]},
+      "name": "GitHub Trigger",
+      "type": "n8n-nodes-base.githubTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"conditions": {"string": [{"value1": "={{$json.body.issue.title.toLowerCase()}}", "operation": "contains", "value2": "bug"}]}},
+      "name": "Contains Bug?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {"resource": "issue", "operation": "edit", "owner": "={{$json.body.repository.owner.login}}", "repository": "={{$json.body.repository.name}}", "issueNumber": "={{$json.body.issue.number}}", "labels": ["bug"]},
+      "name": "Add Bug Label",
+      "type": "n8n-nodes-base.github",
+      "typeVersion": 1,
+      "position": [640, 200]
+    }
+  ],
+  "connections": {
+    "GitHub Trigger": {"main": [[{"node": "Contains Bug?", "type": "main", "index": 0}]]},
+    "Contains Bug?": {"main": [[{"node": "Add Bug Label", "type": "main", "index": 0}], []]}
+  },
+  "active": false,
+  "settings": {}
+}

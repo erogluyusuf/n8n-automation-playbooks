@@ -1,0 +1,24 @@
+{
+  "name": "Productivity: RSS to Telegram",
+  "nodes": [
+    {
+      "parameters": {"url": "https://news.ycombinator.com/rss"},
+      "name": "RSS Feed",
+      "type": "n8n-nodes-base.rssFeedRead",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"chatId": "YOUR_CHAT_ID", "text": "=📰 *{{$json.title}}*\n{{$json.link}}"},
+      "name": "Telegram",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [440, 300]
+    }
+  ],
+  "connections": {
+    "RSS Feed": {"main": [[{"node": "Telegram", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

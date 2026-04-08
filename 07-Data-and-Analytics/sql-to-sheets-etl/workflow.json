@@ -1,0 +1,32 @@
+{
+  "name": "Data: SQL to Sheets ETL",
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "hours", "triggerAtMinute": 30}]}},
+      "name": "Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"operation": "executeQuery", "query": "SELECT * FROM sales_data WHERE processed = false;"},
+      "name": "Extract SQL",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {"operation": "append", "sheetId": "analysis_sheet_id", "options": {}},
+      "name": "Load Sheets",
+      "type": "n8n-nodes-base.googleSheets",
+      "typeVersion": 3,
+      "position": [640, 300]
+    }
+  ],
+  "connections": {
+    "Schedule": {"main": [[{"node": "Extract SQL", "type": "main", "index": 0}]]},
+    "Extract SQL": {"main": [[{"node": "Load Sheets", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

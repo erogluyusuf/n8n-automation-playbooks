@@ -1,0 +1,24 @@
+{
+  "name": "IoT: MQTT Logger",
+  "nodes": [
+    {
+      "parameters": {"topics": "sensors/+/data", "options": {}},
+      "name": "MQTT Trigger",
+      "type": "n8n-nodes-base.mqttTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"operation": "executeQuery", "query": "INSERT INTO sensor_logs (topic, payload) VALUES ('{{$json.topic}}', '{{JSON.stringify($json.message)}}');"},
+      "name": "Postgres: Insert Data",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [440, 300]
+    }
+  ],
+  "connections": {
+    "MQTT Trigger": {"main": [[{"node": "Postgres: Insert Data", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

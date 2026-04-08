@@ -1,0 +1,40 @@
+{
+  "name": "Finance: Crypto Alerts",
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "minutes", "triggerAtMinute": 10}]}},
+      "name": "Cron (10 mins)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"url": "https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum&vs_currencies=usd", "options": {}},
+      "name": "Get Prices",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {"conditions": {"number": [{"value1": "={{$json.bitcoin.usd}}", "operation": "larger", "value2": 70000}]}},
+      "name": "Target Hit?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {"chatId": "YOUR_CHAT_ID", "text": "=🚀 BTC Target Hit! Current Price: ${{$node['Get Prices'].json.bitcoin.usd}}"},
+      "name": "Telegram Notify",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [860, 300]
+    }
+  ],
+  "connections": {
+    "Cron (10 mins)": {"main": [[{"node": "Get Prices", "type": "main", "index": 0}]]},
+    "Get Prices": {"main": [[{"node": "Target Hit?", "type": "main", "index": 0}]]},
+    "Target Hit?": {"main": [[{"node": "Telegram Notify", "type": "main", "index": 0}], []]}
+  },
+  "active": false,
+  "settings": {}
+}

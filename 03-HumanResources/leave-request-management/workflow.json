@@ -1,0 +1,32 @@
+{
+  "name": "HR: Leave Request",
+  "nodes": [
+    {
+      "parameters": {"httpMethod": "POST", "path": "pto-request"},
+      "name": "Webhook: PTO Form",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"toEmail": "={{$json.body.manager_email}}", "subject": "PTO Approval Required", "text": "={{$json.body.employee_name}} has requested PTO from {{$json.body.start_date}} to {{$json.body.end_date}}. Reply YES to approve."},
+      "name": "Email Manager",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {"calendar": "team-calendar@company.com", "start": "={{$node['Webhook: PTO Form'].json.body.start_date}}", "end": "={{$node['Webhook: PTO Form'].json.body.end_date}}", "summary": "={{$node['Webhook: PTO Form'].json.body.employee_name}} (PTO)"},
+      "name": "Update Calendar",
+      "type": "n8n-nodes-base.googleCalendar",
+      "typeVersion": 1,
+      "position": [640, 300]
+    }
+  ],
+  "connections": {
+    "Webhook: PTO Form": {"main": [[{"node": "Email Manager", "type": "main", "index": 0}]]},
+    "Email Manager": {"main": [[{"node": "Update Calendar", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

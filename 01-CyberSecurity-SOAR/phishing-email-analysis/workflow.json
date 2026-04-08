@@ -1,0 +1,46 @@
+{
+  "name": "SOAR: Phishing Email Triage",
+  "nodes": [
+    {
+      "parameters": {
+        "pollTimes": {"item": [{"mode": "everyMinute"}]},
+        "postProcessAction": "read"
+      },
+      "name": "IMAP Email Trigger",
+      "type": "n8n-nodes-base.emailReadImap",
+      "typeVersion": 2,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "resource": "domain",
+        "operation": "report",
+        "domain": "={{ $json[\"text\"].match(/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]/ig)[0] }}"
+      },
+      "name": "VirusTotal Scan",
+      "type": "n8n-nodes-base.virusTotal",
+      "typeVersion": 1,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "channel": "#soc-alerts",
+        "text": "=🚨 *Phishing Alert*\n*Sender:* {{$node[\"IMAP Email Trigger\"].json[\"from\"]}}\n*Domain:* {{$node[\"IMAP Email Trigger\"].json[\"text\"].match(/(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z0-9][a-z0-9-]{0,61}[a-z0-9]/ig)[0]}}\n*Malicious Score:* {{$json[\"positives\"]}} / {{$json[\"total\"]}}"
+      },
+      "name": "Slack Alert",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "IMAP Email Trigger": {
+      "main": [[{"node": "VirusTotal Scan", "type": "main", "index": 0}]]
+    },
+    "VirusTotal Scan": {
+      "main": [[{"node": "Slack Alert", "type": "main", "index": 0}]]
+    }
+  },
+  "active": false,
+  "settings": {}
+}

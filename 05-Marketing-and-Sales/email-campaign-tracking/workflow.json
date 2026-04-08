@@ -1,0 +1,32 @@
+{
+  "name": "Marketing: Email Bounces",
+  "nodes": [
+    {
+      "parameters": {"httpMethod": "POST", "path": "sendgrid-events"},
+      "name": "SendGrid Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"conditions": {"string": [{"value1": "={{$json.body[0].event}}", "operation": "regex", "value2": "(bounce|unsubscribe)"}]}},
+      "name": "Is Bounce/Unsub?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {"operation": "executeQuery", "query": "=UPDATE users SET email_subscribed = false WHERE email = '{{$node['SendGrid Webhook'].json.body[0].email}}';"},
+      "name": "Postgres: Update User",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [660, 200]
+    }
+  ],
+  "connections": {
+    "SendGrid Webhook": {"main": [[{"node": "Is Bounce/Unsub?", "type": "main", "index": 0}]]},
+    "Is Bounce/Unsub?": {"main": [[{"node": "Postgres: Update User", "type": "main", "index": 0}], []]}
+  },
+  "active": false,
+  "settings": {}
+}

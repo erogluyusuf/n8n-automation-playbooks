@@ -1,0 +1,56 @@
+{
+  "name": "SOAR: Threat Intel Enrichment",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "GET",
+        "path": "enrich-ip",
+        "options": {}
+      },
+      "name": "Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [180, 240],
+      "webhookId": "enrich-ip-endpoint"
+    },
+    {
+      "parameters": {
+        "url": "https://api.abuseipdb.com/api/v2/check",
+        "authentication": "headerAuth",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {"name": "ipAddress", "value": "={{ $json.query.ip }}"},
+            {"name": "maxAgeInDays", "value": "90"}
+          ]
+        },
+        "options": {}
+      },
+      "name": "AbuseIPDB API",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [420, 240]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={\n  \"ip\": \"{{ $json.data.ipAddress }}\",\n  \"isPublic\": {{ $json.data.isPublic }},\n  \"abuseConfidenceScore\": {{ $json.data.abuseConfidenceScore }},\n  \"countryCode\": \"{{ $json.data.countryCode }}\",\n  \"usageType\": \"{{ $json.data.usageType }}\"\n}",
+        "options": {}
+      },
+      "name": "Format Response",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [660, 240]
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [[{"node": "AbuseIPDB API", "type": "main", "index": 0}]]
+    },
+    "AbuseIPDB API": {
+      "main": [[{"node": "Format Response", "type": "main", "index": 0}]]
+    }
+  },
+  "active": false,
+  "settings": {}
+}

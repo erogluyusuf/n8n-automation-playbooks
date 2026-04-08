@@ -1,0 +1,24 @@
+{
+  "name": "Community: Discord Welcome",
+  "nodes": [
+    {
+      "parameters": {"httpMethod": "POST", "path": "discord-member-add"},
+      "name": "Discord Webhook",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"webhookUri": "YOUR_DISCORD_WEBHOOK", "text": "=Welcome to the community, <@{{$json.body.user_id}}>! 🚀 Check out our GitHub rules here: https://github.com/your-org"},
+      "name": "Discord Post",
+      "type": "n8n-nodes-base.discord",
+      "typeVersion": 2,
+      "position": [440, 300]
+    }
+  ],
+  "connections": {
+    "Discord Webhook": {"main": [[{"node": "Discord Post", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

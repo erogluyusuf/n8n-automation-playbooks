@@ -1,0 +1,32 @@
+{
+  "name": "Data: Daily Report",
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "days", "triggerAtHour": 9}]}},
+      "name": "Morning Trigger",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"operation": "executeQuery", "query": "SELECT count(*) FROM users WHERE last_login > NOW() - INTERVAL '1 day';"},
+      "name": "Postgres: Active Users",
+      "type": "n8n-nodes-base.postgres",
+      "typeVersion": 2,
+      "position": [420, 300]
+    },
+    {
+      "parameters": {"toEmail": "ceo@company.com", "subject": "Daily Business Metrics", "text": "=Yesterday's Active Users: {{$json.count}}"},
+      "name": "Send Report Email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [640, 300]
+    }
+  ],
+  "connections": {
+    "Morning Trigger": {"main": [[{"node": "Postgres: Active Users", "type": "main", "index": 0}]]},
+    "Postgres: Active Users": {"main": [[{"node": "Send Report Email", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

@@ -1,0 +1,32 @@
+{
+  "name": "Productivity: Daily Tasks",
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "days", "triggerAtHour": 8}]}},
+      "name": "Morning Schedule",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"resource": "task", "operation": "getAll", "filter": "today"},
+      "name": "Todoist",
+      "type": "n8n-nodes-base.todoist",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {"chatId": "YOUR_CHAT_ID", "text": "=🎯 *Tasks for Today:*\n{{$json.content}}"},
+      "name": "Telegram Notify",
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1,
+      "position": [680, 300]
+    }
+  ],
+  "connections": {
+    "Morning Schedule": {"main": [[{"node": "Todoist", "type": "main", "index": 0}]]},
+    "Todoist": {"main": [[{"node": "Telegram Notify", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {}
+}

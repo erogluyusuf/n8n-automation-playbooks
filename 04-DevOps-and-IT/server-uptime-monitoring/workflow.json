@@ -1,0 +1,41 @@
+{
+  "name": "DevOps: Uptime Monitor",
+  "nodes": [
+    {
+      "parameters": {"rule": {"interval": [{"field": "minutes", "triggerAtMinute": 5}]}},
+      "name": "Cron (5 mins)",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {"url": "https://api.mycompany.com/health", "allowUnauthorizedCerts": true},
+      "name": "HTTP Request (Health)",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.1,
+      "position": [420, 300],
+      "continueOnFail": true
+    },
+    {
+      "parameters": {"conditions": {"number": [{"value1": "={{$json.statusCode}}", "operation": "notEqual", "value2": 200}]}},
+      "name": "Is Down?",
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 1,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {"channel": "#incidents", "text": "=🔥 *DOWNTIME DETECTED*\nEndpoint: api.mycompany.com/health\nStatus Code: {{$node['HTTP Request (Health)'].json.statusCode}}"},
+      "name": "Alert Incident",
+      "type": "n8n-nodes-base.slack",
+      "typeVersion": 1,
+      "position": [860, 200]
+    }
+  ],
+  "connections": {
+    "Cron (5 mins)": {"main": [[{"node": "HTTP Request (Health)", "type": "main", "index": 0}]]},
+    "HTTP Request (Health)": {"main": [[{"node": "Is Down?", "type": "main", "index": 0}]]},
+    "Is Down?": {"main": [[{"node": "Alert Incident", "type": "main", "index": 0}], []]}
+  },
+  "active": false,
+  "settings": {}
+}
